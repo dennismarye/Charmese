@@ -6,102 +6,127 @@
 <title>Just one question…</title>
 
 <style>
-body {
-  margin: 0;
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(circle at top, #fff0f6, #ffd6e7);
-  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-}
+  :root{--bg1:#fff0f6;--bg2:#ffd6e7;--accent:#ff3b7a}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,var(--bg1),var(--bg2));font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+  .card{background:#fff;padding:36px 28px;border-radius:18px;width:min(540px,92vw);text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.12)}
+  h1{margin:0 0 18px;font-size:22px}
+  .zone{position:relative;height:160px;margin-top:8px}
+  button{position:absolute;top:50%;transform:translateY(-50%);padding:12px 22px;font-size:16px;font-weight:700;border-radius:999px;border:none;cursor:pointer}
+  #yes{left:18%;background:var(--accent);color:#fff;z-index:3}
+  #no{left:62%;background:#e9e9eb;z-index:1}
+  /* Success overlay */
+  .overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.96);z-index:6;border-radius:18px}
+  .overlay .box{max-width:420px;padding:18px;text-align:center}
+  .overlay h2{margin:0 0 8px}
+  .inline-btn{display:inline-block;margin:8px 6px;padding:10px 16px;border-radius:999px;border:none;cursor:pointer}
+  .primary{background:var(--accent);color:#fff}
+  .muted{background:#f3f4f6}
 
-.card {
-  background: white;
-  padding: 40px 30px;
-  border-radius: 20px;
-  width: min(500px, 92vw);
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,.15);
-}
-
-h1 {
-  font-size: 28px;
-  margin-bottom: 30px;
-}
-
-.zone {
-  position: relative;
-  height: 160px;
-}
-
-button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 14px 26px;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-}
-
-#yes {
-  left: 20%;
-  background: #ff3b7a;
-  color: white;
-}
-
-#no {
-  left: 60%;
-  background: #e5e7eb;
-}
+  @media (max-width:420px){h1{font-size:18px}.zone{height:140px}}
 </style>
 </head>
-
 <body>
 
 <div class="card">
   <h1>Ruth (Charmese), will you be my Valentine?</h1>
 
   <div class="zone" id="zone">
-    <button id="yes">Yes</button>
-    <button id="no">No</button>
+    <button id="yes" aria-label="Yes">Yes</button>
+    <button id="no" aria-label="No">No</button>
+
+    <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+      <div class="box">
+        <h2>Yay! 💖</h2>
+        <p>Thank you — I can't wait. Would you like to pick a time or visit the calendar?</p>
+        <div>
+          <button class="inline-btn primary" id="calendar">Open calendar</button>
+          <button class="inline-btn muted" id="close">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-/* GUARANTEED WORKING CORE */
-
-const noBtn = document.getElementById("no");
-const yesBtn = document.getElementById("yes");
-const zone = document.getElementById("zone");
-
+// Simple, robust interaction logic
+const zone = document.getElementById('zone');
+const yesBtn = document.getElementById('yes');
+const noBtn = document.getElementById('no');
+const overlay = document.getElementById('overlay');
+const calendar = document.getElementById('calendar');
+const closeBtn = document.getElementById('close');
 let yesScale = 1;
 
-/* MOVE NO BUTTON RELIABLY */
-function moveNo() {
+function rectsOverlap(a, b, padding = 8) {
+  return !(a.right + padding < b.left - padding || a.left - padding > b.right + padding || a.bottom + padding < b.top - padding || a.top - padding > b.bottom + padding);
+}
+
+function placeNoAvoidingYes() {
   const zoneRect = zone.getBoundingClientRect();
-  const btnRect = noBtn.getBoundingClientRect();
+  const yesRect = yesBtn.getBoundingClientRect();
+  const btnWidth = noBtn.offsetWidth;
+  const btnHeight = noBtn.offsetHeight;
+  const maxX = Math.max(0, zoneRect.width - btnWidth);
+  const maxY = Math.max(0, zoneRect.height - btnHeight);
 
-  const maxX = zoneRect.width - btnRect.width;
-  const maxY = zoneRect.height - btnRect.height;
+  // try a few times to find a spot that doesn't overlap yes
+  let attempt = 0; let x, y, sampleRect;
+  do {
+    x = Math.random() * maxX;
+    y = Math.random() * maxY;
+    sampleRect = {
+      left: zoneRect.left + x,
+      top: zoneRect.top + y,
+      right: zoneRect.left + x + btnWidth,
+      bottom: zoneRect.top + y + btnHeight
+    };
+    attempt++;
+    if (attempt > 30) break; // give up after many tries
+  } while (rectsOverlap(sampleRect, yesRect, 6));
 
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
+  noBtn.style.left = x + 'px';
+  noBtn.style.top = y + 'px';
+}
 
-  noBtn.style.left = x + "px";
-  noBtn.style.top = y + "px";
-
-  yesScale += 0.15;
+function moveNo() {
+  placeNoAvoidingYes();
+  // grow the yes button slightly to reward the user
+  yesScale = Math.min(2.4, yesScale + 0.12);
   yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
 }
 
-/* TRIGGERS — THESE NEVER FAIL */
-noBtn.addEventListener("mouseenter", moveNo);
-noBtn.addEventListener("mousedown", moveNo);
-noBtn.addEventListener("touchstart", moveNo);
+// Attach robust triggers
+noBtn.addEventListener('mouseenter', moveNo);
+noBtn.addEventListener('mousedown', moveNo);
+noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNo(); }, {passive:false});
 
+// Make sure yes is clickable and shows a success overlay
+yesBtn.addEventListener('click', () => {
+  overlay.style.display = 'flex';
+  // focus management for accessibility
+  closeBtn.focus();
+});
+
+closeBtn.addEventListener('click', () => {
+  overlay.style.display = 'none';
+  yesBtn.focus();
+});
+
+calendar.addEventListener('click', () => {
+  window.open('https://calendar.notion.so/meet/dennismaryc/gsm404o0i', '_blank');
+});
+
+// Ensure initial positions are set once layout is ready
+window.addEventListener('load', () => {
+  // force pixel positioning for yes so overlap checks are predictable
+  const yesLeft = yesBtn.getBoundingClientRect().left - zone.getBoundingClientRect().left;
+  yesBtn.style.left = yesLeft + 'px';
+  placeNoAvoidingYes();
+});
+
+// Reposition no if the window resizes
+window.addEventListener('resize', () => placeNoAvoidingYes());
 </script>
 
 </body>
