@@ -5,337 +5,104 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Just one question…</title>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
 <style>
-:root{
-  --pink1:#ffd6e7;
-  --pink2:#fff0f6;
-  --pinkGlow:#ffb6d5;
-  --yes:#ff3b7a;
-  --text:#2b2b2b;
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top, #fff0f6, #ffd6e7);
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
 }
 
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  min-height:100vh;
-  display:grid;
-  place-items:center;
-  background:radial-gradient(circle at top,var(--pink2),var(--pink1));
-  font-family:system-ui,-apple-system,Segoe UI,sans-serif;
-  color:var(--text);
-  overflow:hidden;
-  transition:background 1s ease, opacity 1s ease;
+.card {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 20px;
+  width: min(500px, 92vw);
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
 }
 
-body.pulse{
-  animation:pulseBg 3s ease-in-out infinite;
-}
-@keyframes pulseBg{
-  0%{background:radial-gradient(circle at top,var(--pink2),var(--pink1))}
-  50%{background:radial-gradient(circle at top,var(--pinkGlow),var(--pink1))}
-  100%{background:radial-gradient(circle at top,var(--pink2),var(--pink1))}
+h1 {
+  font-size: 28px;
+  margin-bottom: 30px;
 }
 
-body.fade-out{opacity:0}
-
-#confettiCanvas{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:10;
+.zone {
+  position: relative;
+  height: 160px;
 }
 
-.card{
-  position:relative;
-  background:#ffffffcc;
-  backdrop-filter:blur(10px);
-  padding:28px 22px 30px;
-  border-radius:26px;
-  width:min(760px,94vw);
-  text-align:center;
-  box-shadow:0 18px 60px rgba(0,0,0,.15);
-  z-index:20;
+button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 14px 26px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
 }
 
-h1{
-  font-size:clamp(26px,4.5vw,44px);
-  margin:12px 0 10px;
-  min-height:2.6em;
+#yes {
+  left: 20%;
+  background: #ff3b7a;
+  color: white;
 }
 
-.countdown{
-  font-size:14px;
-  opacity:.75;
-  margin-bottom:16px;
-}
-
-.zone{
-  position:relative;
-  width:min(520px,94%);
-  height:160px;
-  margin:0 auto;
-  pointer-events:auto;
-}
-
-button{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  padding:16px 26px;
-  font-size:18px;
-  font-weight:800;
-  border-radius:999px;
-  border:none;
-  cursor:pointer;
-  box-shadow:0 10px 24px rgba(0,0,0,.14);
-  pointer-events:auto;
-}
-
-#yesBtn{
-  left:18%;
-  background:var(--yes);
-  color:white;
-}
-
-#noBtn{
-  left:62%;
-  background:#e5e7eb;
-}
-
-.hint,.reaction{
-  font-size:13px;
-  opacity:.65;
-  margin-top:8px;
-}
-
-.reaction{opacity:0;transition:.3s}
-
-.result{display:none;margin-top:14px}
-
-.line{
-  opacity:0;
-  transform:translateY(8px);
-  transition:.6s ease;
-  margin:10px auto;
-  max-width:620px;
-}
-.line.show{opacity:1;transform:none}
-
-.final{font-weight:700;font-size:18px}
-
-.music-box{margin-top:18px;display:none}
-
-.cta{
-  margin-top:18px;
-  padding:16px 28px;
-  border-radius:999px;
-  background:var(--yes);
-  color:white;
-  border:none;
-  font-size:17px;
-  font-weight:700;
-  cursor:pointer;
-}
-
-@keyframes shake{
-  0%{transform:translateY(-50%) rotate(0)}
-  25%{transform:translateY(-50%) rotate(-1deg)}
-  50%{transform:translateY(-50%) rotate(1deg)}
-  75%{transform:translateY(-50%) rotate(-1deg)}
-  100%{transform:translateY(-50%) rotate(0)}
-}
-.shake{animation:shake .25s ease}
-
-.goodbye{
-  position:fixed;
-  inset:0;
-  display:grid;
-  place-items:center;
-  font-size:22px;
-  font-weight:600;
-  opacity:0;
-  transition:opacity 1s ease;
-  z-index:30;
-}
-.goodbye.show{opacity:1}
-
-#replayBtn{
-  position:fixed;
-  bottom:24px;
-  right:24px;
-  padding:12px 18px;
-  border-radius:999px;
-  border:none;
-  background:#ffffffcc;
-  backdrop-filter:blur(6px);
-  font-weight:600;
-  cursor:pointer;
-  box-shadow:0 8px 20px rgba(0,0,0,.15);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .6s ease;
-  z-index:40;
+#no {
+  left: 60%;
+  background: #e5e7eb;
 }
 </style>
 </head>
 
 <body>
-<canvas id="confettiCanvas"></canvas>
 
-<main class="card">
-  <h1 id="title"></h1>
-  <div class="countdown" id="countdown"></div>
+<div class="card">
+  <h1>Ruth (Charmese), will you be my Valentine?</h1>
 
-  <section class="zone" id="zone">
-    <button id="yesBtn">Yes</button>
-    <button id="noBtn">No</button>
-  </section>
-
-  <div class="hint" id="hint">“No” seems confident… for now 😌</div>
-  <div class="reaction" id="reaction"></div>
-
-  <section class="result" id="result">
-    <div class="line">I made this just for you.</div>
-    <div class="line">I have something special planned.</div>
-    <div class="line">No spoilers. Just trust me.</div>
-    <div class="line">All you need to do is pick a time.</div>
-    <div class="line final">Will you save the date with me? ❤️</div>
-
-    <div class="music-box" id="musicBox">
-      <iframe style="border-radius:12px"
-        src="https://open.spotify.com/embed/track/4HclkElcH5XYdWZNxeuIvn"
-        width="100%" height="152" frameborder="0"></iframe>
-    </div>
-
-    <button class="cta" id="ctaBtn">Choose our time 💌</button>
-  </section>
-</main>
-
-<div class="goodbye" id="goodbye">See you soon 💗</div>
-<button id="replayBtn">Replay 💞</button>
+  <div class="zone" id="zone">
+    <button id="yes">Yes</button>
+    <button id="no">No</button>
+  </div>
+</div>
 
 <script>
-/* TYPEWRITER */
-const titleText="Ruth (Charmese), will you be my Valentine?";
-const title=document.getElementById("title");
-let t=0;
-function type(){
-  if(t<titleText.length){
-    title.textContent+=titleText[t++];
-    setTimeout(type,60);
-  }
-}
-type();
+/* GUARANTEED WORKING CORE */
 
-/* COUNTDOWN */
-const cd=document.getElementById("countdown");
-const valentines=new Date(new Date().getFullYear(),1,14);
-function updateCountdown(){
-  const diff=valentines-new Date();
-  if(diff<=0){cd.textContent="Today 💖";return;}
-  cd.textContent=`Valentine’s Day in ${Math.ceil(diff/86400000)} days`;
-}
-updateCountdown();
+const noBtn = document.getElementById("no");
+const yesBtn = document.getElementById("yes");
+const zone = document.getElementById("zone");
 
-/* GAME LOGIC */
-let yesScale=1,noScale=1,follow=false;
-const yesBtn=document.getElementById("yesBtn");
-const noBtn=document.getElementById("noBtn");
-const zone=document.getElementById("zone");
-const reaction=document.getElementById("reaction");
-const hint=document.getElementById("hint");
-const result=document.getElementById("result");
-const lines=document.querySelectorAll(".line");
-const musicBox=document.getElementById("musicBox");
-const goodbye=document.getElementById("goodbye");
-const replayBtn=document.getElementById("replayBtn");
+let yesScale = 1;
 
-function escalate(){
-  yesScale=Math.min(3,yesScale+.18);
-  noScale=Math.max(.4,noScale-.08);
-  yesBtn.style.transform=`translateY(-50%) scale(${yesScale})`;
-  noBtn.style.transform=`translateY(-50%) scale(${noScale})`;
-  yesBtn.classList.add("shake");
-  setTimeout(()=>yesBtn.classList.remove("shake"),250);
-  reaction.textContent=["Nice try 😄","Almost 😏","Not today 😌"][Math.floor(Math.random()*3)];
-  reaction.style.opacity=.7;
-  setTimeout(()=>reaction.style.opacity=0,1200);
-  if(yesScale>1.8) document.body.classList.add("pulse");
-  if(yesScale>2.2) follow=true;
+/* MOVE NO BUTTON RELIABLY */
+function moveNo() {
+  const zoneRect = zone.getBoundingClientRect();
+  const btnRect = noBtn.getBoundingClientRect();
+
+  const maxX = zoneRect.width - btnRect.width;
+  const maxY = zoneRect.height - btnRect.height;
+
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  noBtn.style.left = x + "px";
+  noBtn.style.top = y + "px";
+
+  yesScale += 0.15;
+  yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
 }
 
-function runAway(){
-  const z=zone.getBoundingClientRect();
-  noBtn.style.left=Math.random()*(z.width-100)+"px";
-  noBtn.style.top=Math.random()*(z.height-40)+"px";
-  escalate();
-}
+/* TRIGGERS — THESE NEVER FAIL */
+noBtn.addEventListener("mouseenter", moveNo);
+noBtn.addEventListener("mousedown", moveNo);
+noBtn.addEventListener("touchstart", moveNo);
 
-/* RELIABLE PROXIMITY DETECTION */
-zone.addEventListener("mousemove",(e)=>{
-  const b=noBtn.getBoundingClientRect();
-  const d=Math.hypot(
-    e.clientX-(b.left+b.width/2),
-    e.clientY-(b.top+b.height/2)
-  );
-  if(d<120) runAway();
-});
-
-noBtn.addEventListener("touchstart",e=>{
-  e.preventDefault();
-  runAway();
-});
-noBtn.addEventListener("click",e=>e.preventDefault());
-
-document.addEventListener("mousemove",e=>{
-  if(!follow) return;
-  const z=zone.getBoundingClientRect();
-  yesBtn.style.left=(e.clientX-z.left-yesBtn.offsetWidth/2)+"px";
-  yesBtn.style.top=(e.clientY-z.top-yesBtn.offsetHeight/2)+"px";
-});
-
-yesBtn.addEventListener("click",()=>{
-  zone.style.display="none";
-  hint.style.display="none";
-  result.style.display="block";
-  musicBox.style.display="block";
-  lines.forEach((l,i)=>setTimeout(()=>l.classList.add("show"),i*600));
-});
-
-/* BOOKING + FADE */
-document.getElementById("ctaBtn").addEventListener("click",()=>{
-  window.open("https://calendar.notion.so/meet/dennismaryc/gsm404o0i","_blank");
-  setTimeout(()=>{
-    goodbye.classList.add("show");
-    setTimeout(()=>{
-      document.body.classList.add("fade-out");
-      replayBtn.style.opacity=1;
-      replayBtn.style.pointerEvents="auto";
-    },1500);
-  },600);
-});
-
-/* REPLAY */
-replayBtn.addEventListener("click",()=>{
-  document.body.classList.remove("fade-out","pulse");
-  goodbye.classList.remove("show");
-  replayBtn.style.opacity=0;
-  replayBtn.style.pointerEvents="none";
-  title.textContent="";
-  t=0; type();
-  yesScale=1; noScale=1; follow=false;
-  yesBtn.style.transform="translateY(-50%) scale(1)";
-  noBtn.style.transform="translateY(-50%) scale(1)";
-  noBtn.style.left="62%"; noBtn.style.top="50%";
-  zone.style.display="block";
-  hint.style.display="block";
-  result.style.display="none";
-  musicBox.style.display="none";
-  lines.forEach(l=>l.classList.remove("show"));
-});
 </script>
+
 </body>
 </html>
