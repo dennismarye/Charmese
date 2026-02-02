@@ -1,268 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Will you be my Valentine?</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Just one question…</title>
 
-  <!-- Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-  <style>
-    :root {
-      --bg1: #ffd6e7;
-      --bg2: #fff0f6;
-      --card: #ffffffcc;
-      --yes: #ff3b7a;
-      --yesHover: #ff1f68;
-      --text: #2b2b2b;
-    }
+<style>
+:root{
+  --pink1:#ffd6e7;
+  --pink2:#fff0f6;
+  --pinkGlow:#ffb6d5;
+  --yes:#ff3b7a;
+  --text:#2b2b2b;
+}
+*{box-sizing:border-box}
 
-    * { box-sizing: border-box; }
+body{
+  margin:0;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  background:radial-gradient(circle at top,var(--pink2),var(--pink1));
+  font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+  color:var(--text);
+  overflow:hidden;
+  transition:background 1s ease, opacity 1.2s ease;
+}
+body.pulse{animation:pulseBg 3s ease-in-out infinite}
+@keyframes pulseBg{
+  0%{background:radial-gradient(circle at top,var(--pink2),var(--pink1))}
+  50%{background:radial-gradient(circle at top,var(--pinkGlow),var(--pink1))}
+  100%{background:radial-gradient(circle at top,var(--pink2),var(--pink1))}
+}
+body.fade-out{opacity:0}
 
-    body {
-      margin: 0;
-      min-height: calc(var(--vh, 1vh) * 100);
-      display: grid;
-      place-items: center;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
-      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-      color: var(--text);
-      overflow: hidden;
-      padding: 16px;
-    }
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:9999}
 
-    #confettiCanvas {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 9999;
-    }
+.card{
+  background:#ffffffcc;
+  backdrop-filter:blur(10px);
+  padding:28px 22px 30px;
+  border-radius:26px;
+  width:min(760px,94vw);
+  text-align:center;
+  box-shadow:0 18px 60px rgba(0,0,0,.15);
+}
 
-    .card {
-      width: min(760px, 94vw);
-      padding: 28px 22px 30px;
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      border-radius: 26px;
-      text-align: center;
-      box-shadow: 0 18px 60px rgba(0,0,0,.15);
-    }
+h1{font-size:clamp(26px,4.5vw,44px);margin:12px 0 10px;min-height:2.6em}
 
-    .art {
-      width: min(220px, 80vw);
-      margin: 0 auto 8px;
-      display: block;
-    }
+.countdown{font-size:14px;opacity:.75;margin-bottom:16px}
 
-    h1 {
-      font-size: clamp(26px, 4.2vw, 44px);
-      margin: 12px 0 18px;
-    }
+.zone{position:relative;width:min(520px,94%);height:160px;margin:0 auto}
 
-    .button-zone {
-      position: relative;
-      width: min(520px, 94%);
-      height: 160px;
-      margin: 0 auto;
-      touch-action: none;
-    }
+button{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  padding:16px 26px;
+  font-size:18px;
+  font-weight:800;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.14);
+}
 
-    button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 16px 26px;
-      font-size: 18px;
-      font-weight: 800;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.14);
-      user-select: none;
-      transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
-    }
+#yesBtn{left:18%;background:var(--yes);color:#fff}
+#noBtn{left:62%;background:#e5e7eb}
 
-    #yesBtn {
-      left: 18%;
-      background: var(--yes);
-      color: #fff;
-    }
+.hint,.reaction{font-size:13px;opacity:.65;margin-top:8px}
+.reaction{opacity:0;transition:.3s}
 
-    #yesBtn:hover {
-      background: var(--yesHover);
-      box-shadow: 0 0 28px rgba(255,59,122,.5);
-    }
+.result{display:none;margin-top:14px}
 
-    #noBtn {
-      left: 62%;
-      background: #e5e7eb;
-      color: #111827;
-    }
+.line{opacity:0;transform:translateY(8px);transition:.6s ease;margin:10px auto;max-width:620px}
+.line.show{opacity:1;transform:none}
 
-    .hint {
-      margin-top: 10px;
-      font-size: 13px;
-      opacity: .65;
-    }
+.final{font-weight:700;font-size:18px}
 
-    .result {
-      display: none;
-      margin-top: 14px;
-    }
+.music-box{margin-top:18px;display:none}
 
-    .line {
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity .6s ease, transform .6s ease;
-      margin: 10px auto;
-      max-width: 600px;
-      line-height: 1.55;
-    }
+.cta{
+  margin-top:18px;
+  padding:16px 28px;
+  border-radius:999px;
+  background:var(--yes);
+  color:white;
+  border:none;
+  font-size:17px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 12px 30px rgba(0,0,0,.2);
+}
 
-    .line.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+@keyframes shake{
+  0%{transform:translateY(-50%) rotate(0)}
+  25%{transform:translateY(-50%) rotate(-1deg)}
+  50%{transform:translateY(-50%) rotate(1deg)}
+  75%{transform:translateY(-50%) rotate(-1deg)}
+  100%{transform:translateY(-50%) rotate(0)}
+}
+.shake{animation:shake .25s ease}
 
-    .final-line {
-      font-weight: 700;
-      font-size: 18px;
-      margin-top: 16px;
-    }
+.easter{
+  position:fixed;
+  bottom:20px;
+  font-size:14px;
+  opacity:.75;
+  animation:fadeIn .6s ease;
+}
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:.75;transform:none}
+}
 
-    /* YES SHAKE */
-    @keyframes shake {
-      0% { transform: translateY(-50%) rotate(0deg); }
-      25% { transform: translateY(-50%) rotate(-1deg); }
-      50% { transform: translateY(-50%) rotate(1deg); }
-      75% { transform: translateY(-50%) rotate(-1deg); }
-      100% { transform: translateY(-50%) rotate(0deg); }
-    }
+.goodbye{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+  font-weight:600;
+  opacity:0;
+  transition:opacity 1.2s ease;
+}
+.goodbye.show{opacity:1}
 
-    .shake {
-      animation: shake .25s ease;
-    }
-  </style>
+#replayBtn{
+  position:fixed;
+  bottom:24px;
+  right:24px;
+  padding:12px 18px;
+  border-radius:999px;
+  border:none;
+  background:#ffffffcc;
+  backdrop-filter:blur(6px);
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,.15);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .6s ease;
+}
+</style>
 </head>
 
 <body>
 <canvas id="confettiCanvas"></canvas>
 
 <main class="card">
+  <h1 id="title"></h1>
+  <div class="countdown" id="countdown"></div>
 
-  <svg class="art" viewBox="0 0 200 200">
-    <circle cx="100" cy="100" r="70" fill="#f7c7a1"/>
-    <circle cx="85" cy="90" r="5"/>
-    <circle cx="115" cy="90" r="5"/>
-    <path d="M100 105 C95 115 105 115 100 125" fill="#ff6f91"/>
-    <path d="M140 45 C140 30 155 25 165 35
-             C175 25 190 30 190 45
-             C190 65 165 75 165 90
-             C165 75 140 65 140 45Z"
-          fill="#ff3b7a"/>
-  </svg>
-
-  <h1>Ruth (Charmese), will you be my Valentine?</h1>
-
-  <section class="button-zone" id="zone">
+  <section class="zone" id="zone">
     <button id="yesBtn">Yes</button>
     <button id="noBtn">No</button>
   </section>
 
-  <div class="hint" id="hint">“No” seems a little shy today 🙂</div>
+  <div class="hint" id="hint">“No” seems confident… for now 😌</div>
+  <div class="reaction" id="reaction"></div>
 
   <section class="result" id="result">
     <div class="line">I made this just for you.</div>
-    <div class="line">You bring warmth into ordinary moments and turn them into memories.</div>
-    <div class="line">I love how we laugh easily, how conversations feel natural, and how time slows down when we’re together.</div>
-    <div class="line">This is my small way of saying: you matter to me.</div>
-    <div class="line final-line">I’m really glad it’s you ❤️</div>
-  </section>
+    <div class="line">I have something special planned.</div>
+    <div class="line">No spoilers. Just trust me.</div>
+    <div class="line">All you need to do is pick a time.</div>
+    <div class="line final">Will you save the date with me? ❤️</div>
 
+    <div class="music-box" id="musicBox">
+      <iframe style="border-radius:12px"
+        src="https://open.spotify.com/embed/track/4HclkElcH5XYdWZNxeuIvn?utm_source=generator&theme=0"
+        width="100%" height="152" frameborder="0"
+        allow="autoplay; encrypted-media"></iframe>
+
+      <iframe allow="autoplay *; encrypted-media *"
+        frameborder="0" height="175"
+        style="width:100%;border-radius:10px;margin-top:10px"
+        src="https://embed.music.apple.com/ng/song/angelina/1805943650"></iframe>
+    </div>
+
+    <button class="cta" id="ctaBtn">Choose our time 💌</button>
+  </section>
 </main>
 
-<audio id="ding">
-  <source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" type="audio/mpeg">
-</audio>
+<div class="goodbye" id="goodbye">See you soon 💗</div>
+<button id="replayBtn">Replay 💞</button>
 
 <script>
-  // viewport fix
-  function setVH() {
-    document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+/* TYPEWRITER */
+const titleText="Ruth (Charmese), will you be my Valentine?";
+const title=document.getElementById("title");
+let t=0;
+function type(){
+  if(t<titleText.length){
+    title.textContent+=titleText[t++];
+    setTimeout(type,60);
   }
-  setVH();
-  window.addEventListener('resize', setVH);
+}
+type();
 
-  const zone = document.getElementById("zone");
-  const yesBtn = document.getElementById("yesBtn");
-  const noBtn = document.getElementById("noBtn");
-  const result = document.getElementById("result");
-  const hint = document.getElementById("hint");
-  const lines = document.querySelectorAll(".line");
-  const sound = document.getElementById("ding");
+/* COUNTDOWN */
+const cd=document.getElementById("countdown");
+function updateCountdown(){
+  const now=new Date();
+  const year=now.getMonth()>1?now.getFullYear()+1:now.getFullYear();
+  const v=new Date(year,1,14);
+  const diff=v-now;
+  if(diff<=0){cd.textContent="Today 💖";return;}
+  const d=Math.floor(diff/86400000);
+  cd.textContent=`Valentine’s Day in ${d} days`;
+}
+updateCountdown();
 
-  // Confetti
-  const canvas = document.getElementById("confettiCanvas");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  const confettiInstance = confetti.create(canvas, { resize: true });
+/* GAME */
+let yesScale=1,noScale=1,follow=false,interacted=false;
+const yesBtn=document.getElementById("yesBtn");
+const noBtn=document.getElementById("noBtn");
+const zone=document.getElementById("zone");
+const reaction=document.getElementById("reaction");
+const hint=document.getElementById("hint");
+const result=document.getElementById("result");
+const lines=document.querySelectorAll(".line");
+const musicBox=document.getElementById("musicBox");
+const goodbye=document.getElementById("goodbye");
+const replayBtn=document.getElementById("replayBtn");
 
-  function fireConfetti() {
-    confettiInstance({ particleCount: 200, spread: 120, startVelocity: 45 });
-  }
+function escalate(){
+  interacted=true;
+  yesScale+=.18;
+  noScale=Math.max(.4,noScale-.08);
+  yesBtn.style.transform=`translateY(-50%) scale(${yesScale})`;
+  noBtn.style.transform=`translateY(-50%) scale(${noScale})`;
+  yesBtn.classList.add("shake");
+  setTimeout(()=>yesBtn.classList.remove("shake"),250);
+  if(yesScale>1.8) document.body.classList.add("pulse");
+  if(yesScale>2.2) follow=true;
+}
 
-  // Growth / shrink logic
-  let yesScale = 1;
-  let noScale = 1;
-  let soundPlayed = false;
+function runAway(){
+  const z=zone.getBoundingClientRect();
+  noBtn.style.left=Math.random()*(z.width-100)+"px";
+  noBtn.style.top=Math.random()*(z.height-40)+"px";
+  escalate();
+}
 
-  function growYesAndShrinkNo() {
-    yesScale = Math.min(2.8, yesScale + 0.18);
-    noScale = Math.max(0.45, noScale - 0.08);
+noBtn.onmouseenter=runAway;
+noBtn.onclick=e=>e.preventDefault();
 
-    yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
-    noBtn.style.transform = `translateY(-50%) scale(${noScale})`;
+document.onmousemove=e=>{
+  if(!follow) return;
+  const z=zone.getBoundingClientRect();
+  yesBtn.style.left=(e.clientX-z.left-yesBtn.offsetWidth/2)+"px";
+  yesBtn.style.top=(e.clientY-z.top-yesBtn.offsetHeight/2)+"px";
+};
 
-    yesBtn.classList.add("shake");
-    setTimeout(() => yesBtn.classList.remove("shake"), 250);
+yesBtn.onclick=()=>{
+  zone.style.display="none";
+  hint.style.display="none";
+  result.style.display="block";
+  musicBox.style.display="block";
+  lines.forEach((l,i)=>setTimeout(()=>l.classList.add("show"),i*600));
+};
 
-    if (yesScale >= 2.4 && !soundPlayed) {
-      sound.play();
-      soundPlayed = true;
-    }
-  }
+document.getElementById("ctaBtn").onclick=()=>{
+  window.open("https://calendar.notion.so/meet/dennismaryc/gsm404o0i","_blank");
+  setTimeout(()=>{
+    goodbye.classList.add("show");
+    setTimeout(()=>{
+      document.body.classList.add("fade-out");
+      replayBtn.style.opacity=1;
+      replayBtn.style.pointerEvents="auto";
+    },2000);
+  },800);
+};
 
-  // No runs away
-  function runAway() {
-    const z = zone.getBoundingClientRect();
-    const b = noBtn.getBoundingClientRect();
-
-    noBtn.style.left = Math.random() * (z.width - b.width) + "px";
-    noBtn.style.top  = Math.random() * (z.height - b.height) + "px";
-
-    growYesAndShrinkNo();
-  }
-
-  noBtn.addEventListener("mouseenter", runAway);
-  noBtn.addEventListener("touchstart", e => {
-    e.preventDefault();
-    runAway();
-  });
-  noBtn.addEventListener("click", e => e.preventDefault());
-
-  // Yes click
-  yesBtn.addEventListener("click", () => {
-    zone.style.display = "none";
-    hint.style.display = "none";
-    result.style.display = "block";
-    document.title = "She said YES ❤️";
-    fireConfetti();
-
-    lines.forEach((line, i) => {
-      setTimeout(() => line.classList.add("show"), i * 700);
-    });
-  });
+/* REPLAY */
+replayBtn.onclick=()=>{
+  document.body.classList.remove("fade-out","pulse");
+  goodbye.classList.remove("show");
+  replayBtn.style.opacity=0;
+  replayBtn.style.pointerEvents="none";
+  title.textContent="";
+  t=0; type();
+  yesScale=1; noScale=1; follow=false; interacted=false;
+  yesBtn.style.transform="translateY(-50%) scale(1)";
+  noBtn.style.transform="translateY(-50%) scale(1)";
+  noBtn.style.left="62%"; noBtn.style.top="50%";
+  zone.style.display="block";
+  hint.style.display="block";
+  result.style.display="none";
+  musicBox.style.display="none";
+  lines.forEach(l=>l.classList.remove("show"));
+};
 </script>
 </body>
 </html>
